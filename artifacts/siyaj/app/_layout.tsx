@@ -6,6 +6,7 @@ import {
   useFonts,
 } from "@expo-google-fonts/inter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import * as Notifications from "expo-notifications";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
@@ -14,6 +15,10 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import {
+  requestNotificationPermissions,
+  setupAndroidChannel,
+} from "@/hooks/useNotifications";
 import { RouterProvider } from "@/hooks/useRouterData";
 
 SplashScreen.preventAutoHideAsync();
@@ -41,6 +46,17 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded, fontError]);
+
+  useEffect(() => {
+    const init = async () => {
+      await setupAndroidChannel();
+      await requestNotificationPermissions();
+    };
+    init();
+
+    const sub = Notifications.addNotificationResponseReceivedListener(() => {});
+    return () => sub.remove();
+  }, []);
 
   if (!fontsLoaded && !fontError) return null;
 

@@ -4,8 +4,14 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
+
+import {
+  sendBlockedDeviceNotification,
+  updateDeviceCountNotification,
+} from "./useNotifications";
 
 export interface Device {
   id: string;
@@ -17,6 +23,7 @@ export interface Device {
   speedLimit: number | null;
   lastSeen: string;
   signalStrength: number;
+  isNew?: boolean;
 }
 
 export interface NetworkSettings {
@@ -44,6 +51,7 @@ export interface RouterData {
   routerStatus: "online" | "offline";
   signalRooms: { name: string; strength: number }[];
   uptime: string;
+  blockNewDevices: boolean;
 }
 
 interface RouterContextType {
@@ -55,7 +63,19 @@ interface RouterContextType {
   toggleSchedule: (id: string) => void;
   deleteSchedule: (id: string) => void;
   refreshSpeeds: () => void;
+  toggleBlockNewDevices: () => void;
+  simulateNewDevice: () => void;
 }
+
+const RANDOM_DEVICES = [
+  { name: "Samsung Galaxy S24", type: "phone" as const, mac: "F1:A2:B3:C4:D5:E6" },
+  { name: "MacBook Pro", type: "laptop" as const, mac: "A1:F2:C3:D4:E5:B6" },
+  { name: "Xbox Series X", type: "tv" as const, mac: "B2:C3:F4:A5:D6:E1" },
+  { name: "iPad Air", type: "tablet" as const, mac: "C3:D4:E5:F6:A1:B2" },
+  { name: "جهاز مجهول", type: "other" as const, mac: "D4:E5:F6:A1:B2:C3" },
+];
+
+let deviceCounter = 10;
 
 const defaultDevices: Device[] = [
   { id: "1", name: "iPhone نداء", mac: "A1:B2:C3:D4:E5:F6", ip: "192.168.1.2", type: "phone", blocked: false, speedLimit: null, lastSeen: "الآن", signalStrength: 95 },
@@ -76,22 +96,8 @@ const defaultData: RouterData = {
     securityType: "WPA3",
   },
   parentalSchedules: [
-    {
-      id: "1",
-      label: "وقت النوم",
-      enabled: true,
-      startTime: "22:00",
-      endTime: "07:00",
-      days: [0, 1, 2, 3, 4, 5, 6],
-    },
-    {
-      id: "2",
-      label: "وقت المدرسة",
-      enabled: false,
-      startTime: "08:00",
-      endTime: "14:00",
-      days: [1, 2, 3, 4, 5],
-    },
+    { id: "1", label: "وقت النوم", enabled: true, startTime: "22:00", endTime: "07:00", days: [0, 1, 2, 3, 4, 5, 6] },
+    { id: "2", label: "وقت المدرسة", enabled: false, startTime: "08:00", endTime: "14:00", days: [1, 2, 3, 4, 5] },
   ],
   routerStatus: "online",
   signalRooms: [
@@ -102,12 +108,14 @@ const defaultData: RouterData = {
     { name: "الحديقة", strength: 30 },
   ],
   uptime: "3 أيام 14 ساعة",
+  blockNewDevices: false,
 };
 
 const RouterContext = createContext<RouterContextType | null>(null);
 
 export function RouterProvider({ children }: { children: React.ReactNode }) {
   const [data, setData] = useState<RouterData>(defaultData);
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
     const load = async () => {
@@ -120,12 +128,23 @@ export function RouterProvider({ children }: { children: React.ReactNode }) {
             devices: parsed.devices ?? prev.devices,
             networkSettings: parsed.networkSettings ?? prev.networkSettings,
             parentalSchedules: parsed.parentalSchedules ?? prev.parentalSchedules,
+            blockNewDevices: parsed.blockNewDevices ?? prev.blockNewDevices,
           }));
         }
       } catch {}
     };
     load();
   }, []);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    const active = data.devices.filter((d) => !d.blocked).length;
+    const blocked = data.devices.filter((d) => d.blocked).length;
+    updateDeviceCountNotification(active, blocked);
+  }, [data.devices]);
 
   const save = async (updated: RouterData) => {
     try {
@@ -135,6 +154,7 @@ export function RouterProvider({ children }: { children: React.ReactNode }) {
           devices: updated.devices,
           networkSettings: updated.networkSettings,
           parentalSchedules: updated.parentalSchedules,
+          blockNewDevices: updated.blockNewDevices,
         })
       );
     } catch {}
@@ -220,6 +240,43 @@ export function RouterProvider({ children }: { children: React.ReactNode }) {
     }));
   }, []);
 
+  const toggleBlockNewDevices = useCallback(() => {
+    setData((prev) => {
+      const updated = { ...prev, blockNewDevices: !prev.blockNewDevices };
+      save(updated);
+      return updated;
+    });
+  }, []);
+
+  const simulateNewDevice = useCallback(() => {
+    setData((prev) => {
+      deviceCounter++;
+      const template = RANDOM_DEVICES[deviceCounter % RANDOM_DEVICES.length];
+      const shouldBlock = prev.blockNewDevices;
+      const newDevice: Device = {
+        id: deviceCounter.toString(),
+        name: template.name,
+        mac: template.mac,
+        ip: `192.168.1.${deviceCounter}`,
+        type: template.type,
+        blocked: shouldBlock,
+        speedLimit: null,
+        lastSeen: "الآن",
+        signalStrength: Math.floor(40 + Math.random() * 55),
+        isNew: true,
+      };
+      if (shouldBlock) {
+        sendBlockedDeviceNotification(newDevice.name);
+      }
+      const updated = {
+        ...prev,
+        devices: [newDevice, ...prev.devices],
+      };
+      save(updated);
+      return updated;
+    });
+  }, []);
+
   return (
     <RouterContext.Provider
       value={{
@@ -231,6 +288,8 @@ export function RouterProvider({ children }: { children: React.ReactNode }) {
         toggleSchedule,
         deleteSchedule,
         refreshSpeeds,
+        toggleBlockNewDevices,
+        simulateNewDevice,
       }}
     >
       {children}
