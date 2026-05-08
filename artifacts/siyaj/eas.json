@@ -12,7 +12,9 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_USE_FAST_RESOLVER": "1"
+        "EXPO_USE_FAST_RESOLVER": "1",
+        "npm_config_frozen_lockfile": "false",
+        "PNPM_FLAGS": "--no-frozen-lockfile"
       }
     }
   },
