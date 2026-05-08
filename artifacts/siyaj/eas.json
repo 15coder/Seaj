@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 16.0.0"
+    "version": ">= 16.0.0",
+    "requireCommit": false
   },
   "build": {
     "development": {
@@ -15,8 +16,8 @@
       "android": {
         "buildType": "apk"
       },
-      "ios": {
-        "simulator": false
+      "env": {
+        "NODE_ENV": "production"
       }
     },
     "production": {
