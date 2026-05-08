@@ -9,7 +9,7 @@
     "build": "node scripts/build.js",
     "serve": "node server/serve.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "eas-build-pre-install": "npm install -g pnpm@10.26.1 && printf 'packages:\\n  - artifacts/*\\n  - lib/*\\n  - lib/integrations/*\\n  - scripts\\n' > ../../pnpm-workspace.yaml && rm -f ../../pnpm-lock.yaml && pnpm install --no-frozen-lockfile && echo 'EAS pre-install complete'"
+    "eas-build-pre-install": "npm install -g pnpm@10.26.1 && printf 'packages:\\n  - artifacts/siyaj\\n  - lib/api-client-react\\n  - lib/api-zod\\n  - lib/api-spec\\n' > ../../pnpm-workspace.yaml && rm -f ../../pnpm-lock.yaml && pnpm install --no-frozen-lockfile && echo 'EAS pre-install complete'"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
