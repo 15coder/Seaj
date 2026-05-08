@@ -37,17 +37,6 @@
       "expo-font",
       "expo-web-browser",
       [
-        "expo-build-properties",
-        {
-          "android": {
-            "extraGradleProps": {
-              "org.gradle.jvmargs": "-Xmx4g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8",
-              "org.gradle.daemon": "false"
-            }
-          }
-        }
-      ],
-      [
         "expo-notifications",
         {
           "icon": "./assets/images/icon.png",
