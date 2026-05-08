@@ -1,44 +1,13 @@
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
-import { isLiquidGlassAvailable } from "expo-glass-effect";
 import { Tabs } from "expo-router";
-import { Icon, Label, NativeTabs } from "expo-router/unstable-native-tabs";
 import React from "react";
-import { Platform, StyleSheet, View, useColorScheme } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 
 import { useColors } from "@/hooks/useColors";
 
-function NativeTabLayout() {
-  return (
-    <NativeTabs>
-      <NativeTabs.Trigger name="index">
-        <Icon sf={{ default: "house", selected: "house.fill" }} />
-        <Label>لوحة التحكم</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="devices">
-        <Icon sf={{ default: "wifi", selected: "wifi" }} />
-        <Label>الأجهزة</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="network">
-        <Icon sf={{ default: "network", selected: "network" }} />
-        <Label>الشبكة</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="parental">
-        <Icon sf={{ default: "shield", selected: "shield.fill" }} />
-        <Label>الرقابة</Label>
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="signal">
-        <Icon sf={{ default: "chart.bar", selected: "chart.bar.fill" }} />
-        <Label>الإشارة</Label>
-      </NativeTabs.Trigger>
-    </NativeTabs>
-  );
-}
-
-function ClassicTabLayout() {
+export default function TabLayout() {
   const colors = useColors();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
   const isIOS = Platform.OS === "ios";
   const isWeb = Platform.OS === "web";
 
@@ -65,7 +34,9 @@ function ClassicTabLayout() {
               style={StyleSheet.absoluteFill}
             />
           ) : (
-            <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.card }]} />
+            <View
+              style={[StyleSheet.absoluteFill, { backgroundColor: colors.card }]}
+            />
           ),
         tabBarLabelStyle: {
           fontSize: 10,
@@ -120,11 +91,4 @@ function ClassicTabLayout() {
       />
     </Tabs>
   );
-}
-
-export default function TabLayout() {
-  if (isLiquidGlassAvailable()) {
-    return <NativeTabLayout />;
-  }
-  return <ClassicTabLayout />;
 }

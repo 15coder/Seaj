@@ -35,7 +35,6 @@
         }
       ],
       "expo-font",
-      "expo-web-browser",
       "./plugins/fixGradleJvmArgs",
       [
         "expo-notifications",
@@ -43,6 +42,16 @@
           "icon": "./assets/images/icon.png",
           "color": "#1A1C28",
           "defaultChannel": "siyaj-alerts"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 24,
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35
+          }
         }
       ]
     ],

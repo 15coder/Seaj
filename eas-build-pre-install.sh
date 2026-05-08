@@ -7,20 +7,16 @@ echo "=== EAS pre-install: preparing workspace for build ==="
 npm install -g pnpm@10.26.1
 echo "pnpm installed."
 
-# Replace pnpm-workspace.yaml with a minimal version that any pnpm version understands.
+# Replace pnpm-workspace.yaml with a minimal version any pnpm version understands.
 # The original uses pnpm 9+ features (catalog:, minimumReleaseAge) which break older pnpm.
 cat > pnpm-workspace.yaml << 'EOF'
 packages:
   - artifacts/siyaj
-  - lib/api-client-react
-  - lib/api-zod
-  - lib/api-spec
 EOF
 
 echo "Simplified pnpm-workspace.yaml written."
 
 # Remove the incompatible lockfile (v9.0 format requires pnpm 9+).
-# Without a lockfile, EAS will run "pnpm install" WITHOUT --frozen-lockfile.
 if [ -f pnpm-lock.yaml ]; then
   rm -f pnpm-lock.yaml
   echo "Removed incompatible pnpm-lock.yaml."
@@ -37,18 +33,17 @@ fi
 
 if [ -n "$JAVA17" ]; then
   mkdir -p ~/.gradle
-  # Write gradle.properties to GRADLE_USER_HOME (~/.gradle) which takes highest precedence
-  # over the project-level gradle.properties. This ensures MaxPermSize (removed in Java 9+)
-  # never reaches the JVM args, even if prebuild injects it via the project gradle.properties.
+  # ~/.gradle/gradle.properties takes highest precedence over project gradle.properties
+  # This ensures MaxPermSize (invalid in Java 9+) never reaches the JVM daemon
   cat > ~/.gradle/gradle.properties << GRADLEEOF
 org.gradle.java.home=$JAVA17
 org.gradle.jvmargs=-XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError -Xmx4g -Dfile.encoding=UTF-8
 org.gradle.daemon=true
 org.gradle.parallel=true
 GRADLEEOF
-  echo "Gradle user home properties written (Java home: $JAVA17, JVM args without MaxPermSize)."
+  echo "Gradle user home properties written (Java: $JAVA17)"
 else
-  echo "WARNING: Java 17 not found or installed"
+  echo "WARNING: Java 17 not found"
 fi
 
-echo "=== pre-install complete. EAS will now run a fresh pnpm install. ==="
+echo "=== pre-install complete ==="
