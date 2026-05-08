@@ -38,8 +38,16 @@ fi
 
 if [ -n "$JAVA17" ]; then
   mkdir -p ~/.gradle
-  printf 'org.gradle.java.home=%s\n' "$JAVA17" > ~/.gradle/gradle.properties
-  echo "Java home set to $JAVA17"
+  # Write gradle.properties to GRADLE_USER_HOME (~/.gradle) which takes highest precedence
+  # over the project-level gradle.properties. This ensures MaxPermSize (removed in Java 9+)
+  # never reaches the JVM args, even if prebuild injects it via the project gradle.properties.
+  cat > ~/.gradle/gradle.properties << GRADLEEOF
+org.gradle.java.home=$JAVA17
+org.gradle.jvmargs=-XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError -Xmx4g -Dfile.encoding=UTF-8
+org.gradle.daemon=true
+org.gradle.parallel=true
+GRADLEEOF
+  echo "Gradle user home properties written (Java home: $JAVA17, JVM args without MaxPermSize)."
 else
   echo "WARNING: Java 17 not found or installed"
 fi
