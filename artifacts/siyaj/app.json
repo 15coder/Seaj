@@ -18,7 +18,11 @@
       "bundleIdentifier": "com.siyaj.router"
     },
     "android": {
-      "package": "com.siyaj.router"
+      "package": "com.siyaj.router",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#1A1C28"
+      }
     },
     "web": {
       "favicon": "./assets/images/icon.png"
