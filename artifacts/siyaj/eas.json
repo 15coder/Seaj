@@ -8,9 +8,6 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
-      },
-      "env": {
-        "NPM_CONFIG_FROZEN_LOCKFILE": "false"
       }
     }
   },
