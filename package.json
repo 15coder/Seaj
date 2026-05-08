@@ -2,10 +2,8 @@
   "name": "workspace",
   "version": "0.0.0",
   "license": "MIT",
-  "packageManager": "pnpm@10.26.1",
   "scripts": {
     "preinstall": "sh -c 'if [ -n \"$EAS_BUILD\" ] || [ \"$CI\" = \"1\" ]; then exit 0; fi; rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
-    "eas-build-pre-install": "npm install -g pnpm@10.26.1 && printf 'packages:\\n  - artifacts/siyaj\\n  - lib/api-client-react\\n  - lib/api-zod\\n  - lib/api-spec\\n' > pnpm-workspace.yaml && rm -f pnpm-lock.yaml && pnpm install --no-frozen-lockfile && JAVA17=$(find /usr/lib/jvm /usr/local/lib/jvm 2>/dev/null -maxdepth 4 -name 'javac' | grep -E '(17|21|temurin)' | head -1 | sed 's|/bin/javac||') && if [ -z \"$JAVA17\" ]; then echo 'Installing Java 17 via apt...' && sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends openjdk-17-jdk && JAVA17=$(find /usr/lib/jvm -maxdepth 4 -name 'javac' | grep '17' | head -1 | sed 's|/bin/javac||'); fi && if [ -n \"$JAVA17\" ]; then mkdir -p ~/.gradle && printf 'org.gradle.java.home=%s\\n' \"$JAVA17\" > ~/.gradle/gradle.properties && echo \"Java home set to $JAVA17\"; else echo 'WARNING: Java 17 not found or installed'; fi && echo 'EAS pre-install complete'",
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
