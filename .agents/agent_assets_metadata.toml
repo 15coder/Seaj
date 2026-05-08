@@ -1,0 +1,8 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "1bNm9gYq9OKOjoDrHEqVk"
+uri = "file://artifacts/siyaj/assets/images/icon.png"
+type = "image"
+title = "siyaj router app icon"
